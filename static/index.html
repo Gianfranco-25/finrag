@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>finrag</title>
+<style>
+  :root { --fondo:#fafafa; --texto:#111; --suave:#666; --borde:#ddd; --tarjeta:#fff; --marca:#111; }
+  @media (prefers-color-scheme: dark) {
+    :root { --fondo:#111; --texto:#eee; --suave:#999; --borde:#333; --tarjeta:#1a1a1a; --marca:#eee; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font:16px/1.5 system-ui, sans-serif; background:var(--fondo); color:var(--texto); }
+  main { max-width:760px; margin:0 auto; padding:32px 16px 64px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--suave); margin:0 0 24px; font-size:14px; }
+  form { display:flex; gap:8px; flex-wrap:wrap; }
+  input[type=text] { flex:1 1 300px; padding:12px; border:1px solid var(--borde); border-radius:8px;
+    background:var(--tarjeta); color:var(--texto); font:inherit; }
+  select, button { padding:12px 14px; border-radius:8px; border:1px solid var(--borde); font:inherit;
+    background:var(--tarjeta); color:var(--texto); }
+  button { background:var(--marca); color:var(--fondo); border-color:var(--marca); cursor:pointer; }
+  button:disabled { opacity:.5; cursor:wait; }
+  .ejemplos { margin:12px 0 24px; display:flex; gap:6px; flex-wrap:wrap; }
+  .ejemplos button { background:transparent; color:var(--suave); border-color:var(--borde); font-size:13px; padding:6px 10px; }
+  .respuesta { background:var(--tarjeta); border:1px solid var(--borde); border-radius:10px; padding:16px; white-space:pre-wrap; }
+  .cita { font-weight:600; text-decoration:underline; cursor:pointer; }
+  h2 { font-size:15px; margin:24px 0 8px; color:var(--suave); font-weight:600; }
+  .fuente { border:1px solid var(--borde); border-radius:8px; padding:10px 12px; margin-bottom:8px; font-size:14px;
+    background:var(--tarjeta); }
+  .fuente.activa { border-color:var(--marca); }
+  .fuente .cab { color:var(--suave); font-size:12px; margin-bottom:4px; }
+  .fuente.no-citada { opacity:.55; }
+  .error { color:#b00020; }
+</style>
+</head>
+<body>
+<main>
+  <h1>finrag</h1>
+  <p class="sub">Pregunta sobre la documentación de Banco Demo (entidad ficticia). Cada respuesta cita sus fuentes.</p>
+  <form id="f">
+    <input type="text" id="q" placeholder="¿Cuánto cuesta la segunda tarjeta de débito?" required minlength="3" maxlength="1000">
+    <select id="modo" aria-label="Modo">
+      <option value="rag">RAG</option>
+      <option value="agente">Agente (busca y calcula)</option>
+    </select>
+    <button id="b">Preguntar</button>
+  </form>
+  <div class="ejemplos" id="ej"></div>
+  <div id="out"></div>
+</main>
+<script>
+const ejemplos = [
+  ["¿Qué plazo tiene el banco para responder una reclamación por un cargo no autorizado?", "rag"],
+  ["¿Cuánto cuesta amortizar antes de tiempo un préstamo personal?", "rag"],
+  ["¿Cuál sería la cuota de 12.000 € a 48 meses con nómina domiciliada?", "agente"],
+  ["¿Cuál es la capital de Francia?", "rag"],
+];
+const $ = (id) => document.getElementById(id);
+const esc = (s) => s.replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+for (const [texto, modo] of ejemplos) {
+  const b = document.createElement("button");
+  b.type = "button"; b.textContent = texto;
+  b.onclick = () => { $("q").value = texto; $("modo").value = modo; $("f").requestSubmit(); };
+  $("ej").appendChild(b);
+}
+
+$("f").onsubmit = async (e) => {
+  e.preventDefault();
+  $("b").disabled = true;
+  $("out").innerHTML = '<p class="sub">Buscando en la documentación…</p>';
+  try {
+    const r = await fetch("/api/preguntar", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({pregunta: $("q").value, modo: $("modo").value}),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail?.toString() || r.statusText);
+    const texto = esc(d.respuesta).replace(/\[(\d+)\]/g, '<span class="cita" data-n="$1">[$1]</span>');
+    const fuentes = d.fuentes.map((f) => `
+      <div class="fuente ${d.citadas.includes(f.n) ? "" : "no-citada"}" id="f${f.n}">
+        <div class="cab">[${f.n}] ${esc(f.fuente)} › ${esc(f.seccion)} · similitud ${f.similitud}</div>
+        ${esc(f.fragmento)}
+      </div>`).join("");
+    $("out").innerHTML = `<div class="respuesta">${texto}</div>` +
+      (d.fuentes.length ? `<h2>Fuentes consultadas</h2>${fuentes}` : "");
+    document.querySelectorAll(".cita").forEach((c) => c.onclick = () => {
+      document.querySelectorAll(".fuente").forEach((x) => x.classList.remove("activa"));
+      const f = $("f" + c.dataset.n);
+      if (f) { f.classList.add("activa"); f.scrollIntoView({behavior: "smooth", block: "center"}); }
+    });
+  } catch (err) {
+    $("out").innerHTML = `<p class="error">Error: ${esc(err.message)}</p>`;
+  } finally {
+    $("b").disabled = false;
+  }
+};
+</script>
+</body>
+</html>

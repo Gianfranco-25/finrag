@@ -1,0 +1,17 @@
+[
+  {"pregunta": "¿Cuánto cuesta la segunda tarjeta de débito?", "fuente": "comisiones_cuentas.md", "claves": ["20"]},
+  {"pregunta": "¿Qué comisión de mantenimiento tiene la Cuenta Online si no tengo la nómina domiciliada?", "fuente": "comisiones_cuentas.md", "claves": ["5"]},
+  {"pregunta": "¿Hasta qué edad se puede tener la Cuenta Joven?", "fuente": "comisiones_cuentas.md", "claves": ["29|30"]},
+  {"pregunta": "¿Cuánto cuesta sacar dinero a crédito en un cajero con la tarjeta Clásica?", "fuente": "comisiones_cuentas.md", "claves": ["3 ?%"]},
+  {"pregunta": "¿Qué TIN tiene el préstamo personal con nómina domiciliada?", "fuente": "prestamos_personales.md", "claves": ["6,95|6\\.95"]},
+  {"pregunta": "¿Qué comisión tiene amortizar anticipadamente si quedan más de 12 meses?", "fuente": "prestamos_personales.md", "claves": ["1 ?%"]},
+  {"pregunta": "¿Cuántos días tengo para desistir de un préstamo?", "fuente": "prestamos_personales.md", "claves": ["14"]},
+  {"pregunta": "¿Qué porcentaje de los ingresos pueden suponer como máximo las cuotas de deuda?", "fuente": "prestamos_personales.md", "claves": ["35"]},
+  {"pregunta": "¿Durante cuánto tiempo hay que guardar la copia del documento de identidad del cliente?", "fuente": "prevencion_blanqueo.md", "claves": ["10"]},
+  {"pregunta": "¿En qué plazo hay que comunicar una operación sospechosa a Cumplimiento?", "fuente": "prevencion_blanqueo.md", "claves": ["24"]},
+  {"pregunta": "¿Se puede avisar al cliente de que su operación se está analizando?", "fuente": "prevencion_blanqueo.md", "claves": ["no|prohib"]},
+  {"pregunta": "¿Qué plazo tiene el banco para responder una reclamación sobre una transferencia?", "fuente": "reclamaciones.md", "claves": ["15"]},
+  {"pregunta": "¿Cuándo devuelve el banco un cargo de tarjeta no autorizado?", "fuente": "reclamaciones.md", "claves": ["siguiente"]},
+  {"pregunta": "¿Cuál es la capital de Francia?", "fuente": null, "claves": []},
+  {"pregunta": "¿Qué rentabilidad tienen los fondos de inversión del banco?", "fuente": null, "claves": []}
+]
